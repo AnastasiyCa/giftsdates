@@ -4,7 +4,7 @@ import { Label } from "./ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
 import { LANGUAGES, t } from "../lib/i18n";
 
-export const INTENTS = ["serious", "marriage", "casual", "friendship", "travel", "sponsor"];
+export const INTENTS = ["serious", "marriage", "casual", "just_sex", "friendship", "travel", "sponsor"];
 export const INCOMES = ["low", "mid", "high", "vip", "custom", "prefer_not"];
 export const KIDS = ["none", "have", "want", "no_want"];
 export const HABITS = ["never", "sometimes", "often"];
@@ -47,12 +47,23 @@ export default function ProfileDetailsForm({ f, setF, lang, gender }) {
     const cur = f.languages_spoken || [];
     set("languages_spoken")(cur.includes(code) ? cur.filter(c => c !== code) : [...cur, code]);
   };
+  const intents = Array.isArray(f.relationship_intent) ? f.relationship_intent : (f.relationship_intent ? [f.relationship_intent] : []);
+  const toggleIntent = (v) => {
+    set("relationship_intent")(intents.includes(v) ? intents.filter(x => x !== v) : [...intents, v]);
+  };
   return (
     <>
       <div className="glass rounded-2xl p-6 space-y-4 mb-6" data-testid="profile-details-section">
         <h2 className="font-serif-luxe text-2xl">{t("details", lang)}</h2>
+        <Field label={`${t("relationship_intent", lang)} (${t("select_multiple", lang)})`}>
+          <div className="flex flex-wrap gap-2 mt-2" data-testid="profile-intent-chips">
+            {INTENTS.map(o => {
+              const on = intents.includes(o);
+              return <button type="button" key={o} data-testid={`profile-intent-chip-${o}`} onClick={() => toggleIntent(o)} className={`px-3 py-1.5 rounded-full text-xs border transition-colors ${on ? "bg-rose-500/20 border-rose-500/50 text-rose-200" : "bg-white/5 border-white/10 text-slate-400 hover:bg-white/10"}`}>{optLabel("relationship_intent", o, lang)}</button>;
+            })}
+          </div>
+        </Field>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label={t("relationship_intent", lang)}><Sel testid="profile-intent-select" field="relationship_intent" value={f.relationship_intent} options={INTENTS} onChange={set("relationship_intent")} lang={lang} /></Field>
           <Field label={t("orientation", lang)}><Sel testid="profile-orientation-select" field="orientation" value={f.orientation} options={ORIENTATIONS} onChange={set("orientation")} lang={lang} /></Field>
           <Field label={t("job_title", lang)}><Input data-testid="profile-job-input" value={f.job_title || ""} onChange={e => set("job_title")(e.target.value)} className="bg-white/5 border-white/10 mt-1" /></Field>
           <Field label={t("height", lang)}><Input data-testid="profile-height-input" type="number" min="100" max="250" value={f.height || ""} onChange={e => set("height")(e.target.value ? parseInt(e.target.value) : null)} className="bg-white/5 border-white/10 mt-1" /></Field>

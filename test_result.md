@@ -103,7 +103,7 @@
 #====================================================================================================
 
 
-user_problem_statement: "Test new registration fields and zodiac feature on the GiftsDates FastAPI backend. Test: 1) POST /api/auth/register with NEW user including language, birth_day, birth_month, birth_year fields and verify zodiac computation, 2) Test expanded orientation values (pansexual, demisexual), 3) Login and GET /api/auth/me to verify persistence, 4) PATCH /api/auth/me to update birth date and verify zodiac recomputation, 5) GET /api/profiles to verify zodiac field is included."
+user_problem_statement: "Test multi-select 'Looking for' (relationship_intent) feature on the GiftsDates FastAPI backend. Test: 1) Register + login a new user, 2) PATCH /api/auth/me with relationship_intent as a LIST of multiple values, 3) GET /api/auth/me to confirm array persists, 4) PATCH /api/auth/me with ALL intents to confirm it accepts all of them, 5) GET /api/profiles to verify relationship_intent arrays are returned correctly."
 
 backend:
   - task: "POST /api/auth/register - New registration fields (language, birth_date, zodiac)"
@@ -250,6 +250,78 @@ backend:
         agent: "testing"
         comment: "Tested unauthenticated access to protected endpoint /api/auth/me. Correctly returns 401 Unauthorized. Authentication security working as expected."
 
+  - task: "POST /api/auth/register + POST /api/auth/login - Multi-select relationship_intent feature"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested user registration and login for relationship_intent feature testing. Registration successful with unique test user. Login successful with JWT token generation. Authentication working correctly."
+
+  - task: "PATCH /api/auth/me - relationship_intent as LIST of multiple values"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested PATCH /api/auth/me with relationship_intent=['serious','marriage','friendship','travel']. Update successful - returns 200 with user object. Verified: relationship_intent field exists, is stored as a list (not string), has correct length (4), contains all sent values, and matches exactly. Multi-select relationship_intent working correctly."
+
+  - task: "GET /api/auth/me - Verify relationship_intent array persistence"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested GET /api/auth/me to verify relationship_intent array persistence. Verified: relationship_intent field exists, is returned as a list, and persisted correctly with all 4 values ['serious','marriage','friendship','travel']. Array persistence working correctly."
+
+  - task: "PATCH /api/auth/me - relationship_intent with ALL intent values"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested PATCH /api/auth/me with ALL 6 relationship_intent values: ['serious','marriage','casual','friendship','travel','sponsor']. Update successful - returns 200. Verified: relationship_intent field exists, is a list, has all 6 values, and contains all sent values. Backend correctly accepts and stores all possible intent values."
+
+  - task: "GET /api/profiles - Verify relationship_intent arrays in profiles"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested GET /api/profiles to verify relationship_intent arrays are returned correctly. Endpoint returns 200 with list of profiles. Out of 11 profiles, 4 have relationship_intent field: 3 as lists (newly created/updated profiles), 1 as string (legacy profile 'Cristina' with empty string - data migration needed). NEW profiles correctly return relationship_intent as arrays. Verified test users have relationship_intent=['serious','marriage','casual','friendship','travel','sponsor'] returned as list. Multi-select feature working correctly for new data. Note: Legacy profile with string value exists but does not affect new functionality."
+
+  - task: "GET /api/profiles?intent=marriage - Search filter (PREMIUM required)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested GET /api/profiles?intent=marriage with non-premium user. Returns 403 with 'PREMIUM_REQUIRED' error as expected. This is correct behavior - advanced filters including intent search require Premium status. Filter endpoint working as designed."
+
 frontend:
   - task: "Frontend testing"
     implemented: false
@@ -265,17 +337,16 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.1"
-  test_sequence: 2
+  version: "1.2"
+  test_sequence: 3
   run_ui: false
 
 test_plan:
   current_focus:
-    - "POST /api/auth/register - New registration fields (language, birth_date, zodiac)"
-    - "POST /api/auth/register - Expanded orientation values"
-    - "GET /api/auth/me - Verify new fields persistence"
-    - "PATCH /api/auth/me - Update birth date and zodiac recomputation"
-    - "GET /api/profiles - Zodiac field in profiles"
+    - "PATCH /api/auth/me - relationship_intent as LIST of multiple values"
+    - "GET /api/auth/me - Verify relationship_intent array persistence"
+    - "PATCH /api/auth/me - relationship_intent with ALL intent values"
+    - "GET /api/profiles - Verify relationship_intent arrays in profiles"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -285,3 +356,5 @@ agent_communication:
     message: "Backend testing completed successfully. All 7 core authentication and basic endpoint tests passed. The restored GiftsDates FastAPI app is working correctly in the fresh environment with new MongoDB, JWT_SECRET, and EMERGENT_LLM_KEY. Test results: 1) GET /api/meta returns 200 with all metadata, 2) GET /api/ root returns 200 with service info, 3) User registration working (POST /api/auth/register), 4) User login working with JWT token generation (POST /api/auth/login), 5) Authenticated profile fetch working (GET /api/auth/me), 6) Browse profiles endpoint working (GET /api/profiles), 7) Authentication security correctly rejects unauthenticated requests with 401. Backend service is running on 0.0.0.0:8001 and accessible via the public URL. No issues found."
   - agent: "testing"
     message: "NEW REGISTRATION FIELDS & ZODIAC FEATURE TESTING COMPLETED - ALL 5 TESTS PASSED. Test results: 1) POST /api/auth/register with new fields (language='es', birth_year=1995, birth_month=8, birth_day=15) - PASS: language stored correctly, birth_date computed as '1995-08-15', zodiac correctly computed as 'leo', age auto-computed as 31 (overriding passed age). 2) Expanded orientation values (pansexual, demisexual) - PASS: both orientations accepted and stored correctly. 3) Login and GET /api/auth/me - PASS: zodiac, birth_date, and language persist correctly after login. 4) PATCH /api/auth/me with birth_year=1990, birth_month=12, birth_day=25 - PASS: birth_date updated to '1990-12-25', zodiac recomputed to 'capricorn', age recomputed to 35. 5) GET /api/profiles - PASS: zodiac field is included in profile responses (7 profiles returned, 5 have zodiac field, 1 has zodiac value set). All new registration fields and zodiac computation features are working correctly. No issues found."
+  - agent: "testing"
+    message: "MULTI-SELECT RELATIONSHIP_INTENT FEATURE TESTING COMPLETED - ALL 5 TESTS PASSED. Test results: 1) Register + login new user - PASS: registration and authentication working correctly. 2) PATCH /api/auth/me with relationship_intent=['serious','marriage','friendship','travel'] - PASS: accepts array, stores correctly, returns as list with all 4 values. 3) GET /api/auth/me - PASS: relationship_intent array persists correctly after update. 4) PATCH /api/auth/me with ALL 6 intents ['serious','marriage','casual','friendship','travel','sponsor'] - PASS: accepts and stores all possible values as array. 5) GET /api/profiles - PASS: profiles with relationship_intent return it as arrays (3 out of 4 profiles with the field have it as lists; 1 legacy profile has empty string - data migration needed but doesn't affect new functionality). 6) GET /api/profiles?intent=marriage - PASS: correctly returns 403 PREMIUM_REQUIRED for non-premium users (expected behavior). Multi-select relationship_intent feature is fully functional. ProfileUpdate model correctly defines relationship_intent as Optional[List[str]], PATCH endpoint accepts and stores arrays, GET endpoints return arrays for new/updated profiles. Note: One legacy profile (Cristina) has relationship_intent as empty string - recommend data migration script to convert old string values to arrays, but this doesn't impact new feature functionality."

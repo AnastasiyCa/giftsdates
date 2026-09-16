@@ -412,7 +412,7 @@ class ProfileUpdate(BaseModel):
     interests: Optional[List[str]] = None
     photos: Optional[List[str]] = None
     language: Optional[str] = None
-    relationship_intent: Optional[str] = None
+    relationship_intent: Optional[List[str]] = None
     orientation: Optional[str] = None
     gender: Optional[str] = None
     hobbies: Optional[List[str]] = None
