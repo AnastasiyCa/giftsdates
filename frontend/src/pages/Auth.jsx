@@ -9,21 +9,57 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { toast } from "sonner";
 import { useApp } from "../context/AppContext";
 import { t } from "../lib/i18n";
+import { LANGUAGES, ZODIAC_EMOJI } from "../lib/i18n";
 import SpinWheel from "../components/SpinWheel";
 import { Eye, EyeOff } from "lucide-react";
 
+const MONTHS = [1,2,3,4,5,6,7,8,9,10,11,12];
+const DAYS = Array.from({ length: 31 }, (_, i) => i + 1);
+const CUR_YEAR = new Date().getFullYear();
+const YEARS = Array.from({ length: 82 }, (_, i) => CUR_YEAR - 18 - i); // 18..99 y.o.
+
+const ZODIAC_BOUNDS = [
+  [1, 20, "aquarius"], [2, 19, "pisces"], [3, 21, "aries"], [4, 20, "taurus"],
+  [5, 21, "gemini"], [6, 21, "cancer"], [7, 23, "leo"], [8, 23, "virgo"],
+  [9, 23, "libra"], [10, 23, "scorpio"], [11, 22, "sagittarius"], [12, 22, "capricorn"],
+];
+function calcZodiac(month, day) {
+  if (!month || !day) return null;
+  let sign = "capricorn";
+  for (const [m, d, name] of ZODIAC_BOUNDS) {
+    if (month === m) { sign = day >= d ? name : sign; break; }
+    if (month > m) sign = name;
+  }
+  return sign;
+}
+function calcAge(y, m, d) {
+  if (!y || !m || !d) return null;
+  const now = new Date();
+  let a = now.getFullYear() - y;
+  if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) a -= 1;
+  return a > 0 && a < 120 ? a : null;
+}
+
 export default function Auth() {
-  const { login, register, lang } = useApp();
+  const { login, register, lang, setLanguage } = useApp();
   const nav = useNavigate();
   const [sp] = useSearchParams();
   const [mode, setMode] = useState(sp.get("register") ? "register" : "login");
-  const [f, setF] = useState({ email: "", password: "", name: "", age: 25, gender: "female", interested_in: "male", orientation: "straight", city: "", country: "", bio: "", referral_code: sp.get("ref") || "" });
+  const [f, setF] = useState({ email: "", password: "", name: "", age: 25, gender: "female", interested_in: "male", orientation: "straight", city: "", country: "", bio: "", referral_code: sp.get("ref") || "", language: lang, birth_day: "", birth_month: "", birth_year: "" });
   const [busy, setBusy] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [pendingSpin] = useState(() => {
     try { const p = JSON.parse(localStorage.getItem("gd_spin_prize") || "null"); return p && localStorage.getItem("gd_spin_token") ? p : null; } catch { return null; }
   });
+
+  const setBirth = (key, v) => {
+    const nf = { ...f, [key]: parseInt(v) };
+    const age = calcAge(nf.birth_year, nf.birth_month, nf.birth_day);
+    if (age) nf.age = age;
+    setF(nf);
+  };
+  const zodiacPreview = calcZodiac(f.birth_month ? parseInt(f.birth_month) : null, f.birth_day ? parseInt(f.birth_day) : null);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -33,7 +69,15 @@ export default function Auth() {
       if (mode === "login") { await login(f.email, f.password); toast.success(t("welcome_back", lang)); }
       else {
         const st = localStorage.getItem("gd_spin_token");
-        await register({ ...f, spin_token: st || undefined });
+        const payload = {
+          ...f,
+          birth_day: f.birth_day ? parseInt(f.birth_day) : undefined,
+          birth_month: f.birth_month ? parseInt(f.birth_month) : undefined,
+          birth_year: f.birth_year ? parseInt(f.birth_year) : undefined,
+          spin_token: st || undefined,
+        };
+        await register(payload);
+        if (f.language && f.language !== lang) setLanguage(f.language);
         if (pendingSpin) {
           localStorage.removeItem("gd_spin_token"); localStorage.removeItem("gd_spin_prize");
           const p = pendingSpin.type === "premium" ? t("spin_premium_prize", lang) : t("spin_coins_prize", lang).replace("{n}", pendingSpin.coins);
@@ -87,11 +131,32 @@ export default function Auth() {
 
           {mode === "register" && (
             <>
-              <div className="grid grid-cols-2 gap-3">
-                <div><Label className="text-xs text-slate-400">{t("name", lang)}</Label>
-                  <Input data-testid="auth-name-input" required value={f.name} onChange={e => setF({ ...f, name: e.target.value })} className="bg-white/5 border-white/10 mt-1" /></div>
-                <div><Label className="text-xs text-slate-400">{t("age", lang)}</Label>
-                  <Input data-testid="auth-age-input" type="number" min="18" max="99" required value={f.age} onChange={e => setF({ ...f, age: parseInt(e.target.value || 18) })} className="bg-white/5 border-white/10 mt-1" /></div>
+              <div>
+                <Label className="text-xs text-slate-400">{t("language_label", lang)}</Label>
+                <Select value={f.language} onValueChange={v => setF({ ...f, language: v })}>
+                  <SelectTrigger data-testid="auth-language-select" className="bg-white/5 border-white/10 mt-1"><SelectValue /></SelectTrigger>
+                  <SelectContent className="bg-[#161320] border-white/10 max-h-72">{LANGUAGES.map(l => <SelectItem key={l.code} value={l.code}>{l.flag} {l.name}</SelectItem>)}</SelectContent>
+                </Select>
+              </div>
+              <div><Label className="text-xs text-slate-400">{t("name", lang)}</Label>
+                <Input data-testid="auth-name-input" required value={f.name} onChange={e => setF({ ...f, name: e.target.value })} className="bg-white/5 border-white/10 mt-1" /></div>
+              <div>
+                <Label className="text-xs text-slate-400">{t("birth_date", lang)}</Label>
+                <div className="grid grid-cols-3 gap-2 mt-1">
+                  <Select value={f.birth_day ? String(f.birth_day) : undefined} onValueChange={v => setBirth("birth_day", v)}>
+                    <SelectTrigger data-testid="auth-birth-day-select" className="bg-white/5 border-white/10"><SelectValue placeholder={t("day", lang)} /></SelectTrigger>
+                    <SelectContent className="bg-[#161320] border-white/10 max-h-72">{DAYS.map(d => <SelectItem key={d} value={String(d)}>{d}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Select value={f.birth_month ? String(f.birth_month) : undefined} onValueChange={v => setBirth("birth_month", v)}>
+                    <SelectTrigger data-testid="auth-birth-month-select" className="bg-white/5 border-white/10"><SelectValue placeholder={t("month", lang)} /></SelectTrigger>
+                    <SelectContent className="bg-[#161320] border-white/10 max-h-72">{MONTHS.map(m => <SelectItem key={m} value={String(m)}>{String(m).padStart(2,"0")}</SelectItem>)}</SelectContent>
+                  </Select>
+                  <Select value={f.birth_year ? String(f.birth_year) : undefined} onValueChange={v => setBirth("birth_year", v)}>
+                    <SelectTrigger data-testid="auth-birth-year-select" className="bg-white/5 border-white/10"><SelectValue placeholder={t("year", lang)} /></SelectTrigger>
+                    <SelectContent className="bg-[#161320] border-white/10 max-h-72">{YEARS.map(y => <SelectItem key={y} value={String(y)}>{y}</SelectItem>)}</SelectContent>
+                  </Select>
+                </div>
+                {zodiacPreview && <p className="mt-1.5 text-xs text-violet-300 flex items-center gap-1" data-testid="auth-zodiac-preview"><span aria-hidden="true">{ZODIAC_EMOJI[zodiacPreview]}</span> {t(`zod_${zodiacPreview}`, lang)}{f.age ? ` · ${f.age}` : ""}</p>}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>

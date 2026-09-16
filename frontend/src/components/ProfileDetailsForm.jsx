@@ -13,7 +13,7 @@ export const BUST = ["A", "B", "C", "D", "E", "F+"];
 export const SIZES = ["s", "m", "l", "xl"];
 
 export const GENDERS = ["female", "male", "trans_woman", "trans_man", "non_binary"];
-export const ORIENTATIONS = ["straight", "lesbian", "gay", "bisexual", "pansexual", "transgender", "queer", "prefer_not"];
+export const ORIENTATIONS = ["straight", "gay", "lesbian", "bisexual", "pansexual", "omnisexual", "polysexual", "asexual", "demisexual", "sapiosexual", "aromantic", "transgender", "queer", "fluid", "questioning", "prefer_not"];
 export const genderLabel = (g, lang) => t(g, lang);
 
 export const optLabel = (field, v, lang) => {

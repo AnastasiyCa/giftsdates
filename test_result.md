@@ -103,9 +103,69 @@
 #====================================================================================================
 
 
-user_problem_statement: "Verify core AUTH and basic endpoints work in this fresh environment (new empty MongoDB, freshly generated JWT_SECRET, EMERGENT_LLM_KEY set). Test ONLY core essential flows: 1. GET /api/meta returns 200, 2. User registration, 3. User login with JWT token, 4. Authenticated request to fetch user profile, 5. Browse/profiles listing endpoint returns 200."
+user_problem_statement: "Test new registration fields and zodiac feature on the GiftsDates FastAPI backend. Test: 1) POST /api/auth/register with NEW user including language, birth_day, birth_month, birth_year fields and verify zodiac computation, 2) Test expanded orientation values (pansexual, demisexual), 3) Login and GET /api/auth/me to verify persistence, 4) PATCH /api/auth/me to update birth date and verify zodiac recomputation, 5) GET /api/profiles to verify zodiac field is included."
 
 backend:
+  - task: "POST /api/auth/register - New registration fields (language, birth_date, zodiac)"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested POST /api/auth/register with new fields: language='es', birth_year=1995, birth_month=8, birth_day=15. Registration successful - returns 200 with token and user object. Verified: language stored as 'es', birth_date computed as '1995-08-15', zodiac correctly computed as 'leo', age auto-computed as 31 (overriding passed age of 25). All new fields working correctly."
+
+  - task: "POST /api/auth/register - Expanded orientation values"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested POST /api/auth/register with expanded orientation values: 'pansexual' and 'demisexual'. Both orientations accepted and stored correctly. Registration successful for both test cases."
+
+  - task: "GET /api/auth/me - Verify new fields persistence"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested login and GET /api/auth/me to verify persistence of new fields. Verified: zodiac='leo', birth_date='1995-08-15', language='es' all persist correctly after login. Authentication and data persistence working correctly."
+
+  - task: "PATCH /api/auth/me - Update birth date and zodiac recomputation"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested PATCH /api/auth/me with birth_year=1990, birth_month=12, birth_day=25. Update successful - birth_date updated to '1990-12-25', zodiac correctly recomputed to 'capricorn', age recomputed to 35. All update logic working correctly."
+
+  - task: "GET /api/profiles - Zodiac field in profiles"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "Tested GET /api/profiles to verify zodiac field is included. Endpoint returns 200 with list of profiles. Out of 7 profiles returned, 5 have zodiac field present, 1 has zodiac value set. Zodiac field is correctly included in profile responses for users who have it set. Sample verified: 'Sophia Martinez' with zodiac='capricorn'."
+
   - task: "GET /api/meta endpoint"
     implemented: true
     working: true
@@ -205,19 +265,17 @@ frontend:
 
 metadata:
   created_by: "testing_agent"
-  version: "1.0"
-  test_sequence: 1
+  version: "1.1"
+  test_sequence: 2
   run_ui: false
 
 test_plan:
   current_focus:
-    - "GET /api/meta endpoint"
-    - "GET /api/ root endpoint"
-    - "POST /api/auth/register - User registration"
-    - "POST /api/auth/login - User login"
-    - "GET /api/auth/me - Authenticated user profile"
-    - "GET /api/profiles - Browse profiles listing"
-    - "Authentication security - Reject unauthenticated requests"
+    - "POST /api/auth/register - New registration fields (language, birth_date, zodiac)"
+    - "POST /api/auth/register - Expanded orientation values"
+    - "GET /api/auth/me - Verify new fields persistence"
+    - "PATCH /api/auth/me - Update birth date and zodiac recomputation"
+    - "GET /api/profiles - Zodiac field in profiles"
   stuck_tasks: []
   test_all: false
   test_priority: "high_first"
@@ -225,3 +283,5 @@ test_plan:
 agent_communication:
   - agent: "testing"
     message: "Backend testing completed successfully. All 7 core authentication and basic endpoint tests passed. The restored GiftsDates FastAPI app is working correctly in the fresh environment with new MongoDB, JWT_SECRET, and EMERGENT_LLM_KEY. Test results: 1) GET /api/meta returns 200 with all metadata, 2) GET /api/ root returns 200 with service info, 3) User registration working (POST /api/auth/register), 4) User login working with JWT token generation (POST /api/auth/login), 5) Authenticated profile fetch working (GET /api/auth/me), 6) Browse profiles endpoint working (GET /api/profiles), 7) Authentication security correctly rejects unauthenticated requests with 401. Backend service is running on 0.0.0.0:8001 and accessible via the public URL. No issues found."
+  - agent: "testing"
+    message: "NEW REGISTRATION FIELDS & ZODIAC FEATURE TESTING COMPLETED - ALL 5 TESTS PASSED. Test results: 1) POST /api/auth/register with new fields (language='es', birth_year=1995, birth_month=8, birth_day=15) - PASS: language stored correctly, birth_date computed as '1995-08-15', zodiac correctly computed as 'leo', age auto-computed as 31 (overriding passed age). 2) Expanded orientation values (pansexual, demisexual) - PASS: both orientations accepted and stored correctly. 3) Login and GET /api/auth/me - PASS: zodiac, birth_date, and language persist correctly after login. 4) PATCH /api/auth/me with birth_year=1990, birth_month=12, birth_day=25 - PASS: birth_date updated to '1990-12-25', zodiac recomputed to 'capricorn', age recomputed to 35. 5) GET /api/profiles - PASS: zodiac field is included in profile responses (7 profiles returned, 5 have zodiac field, 1 has zodiac value set). All new registration fields and zodiac computation features are working correctly. No issues found."

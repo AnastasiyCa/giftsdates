@@ -13,6 +13,11 @@ export const LANGUAGES = [
   { code: "ar", name: "العربية", flag: "🇸🇦", dir: "rtl" },
 ];
 
+export const ZODIAC_EMOJI = {
+  aries: "♈", taurus: "♉", gemini: "♊", cancer: "♋", leo: "♌", virgo: "♍",
+  libra: "♎", scorpio: "♏", sagittarius: "♐", capricorn: "♑", aquarius: "♒", pisces: "♓",
+};
+
 const T = {
   brand: { ru: "GiftsDates", en: "GiftsDates", es: "GiftsDates", fr: "GiftsDates", de: "GiftsDates", pt: "GiftsDates", zh: "GiftsDates", ar: "GiftsDates", hi: "GiftsDates", bn: "GiftsDates", ur: "GiftsDates" },
   tagline: {
@@ -382,6 +387,32 @@ const T = {
   or_pansexual: { ru: "Пансексуал", en: "Pansexual", es: "Pansexual", fr: "Pansexuel", de: "Pansexuell", pt: "Pansexual", zh: "泛性恋", ar: "شامل الميول", hi: "पैनसेक्शुअल", bn: "প্যানসেক্সুয়াল", ur: "پین سیکشوئل" },
   or_transgender: { ru: "Трансгендер", en: "Transgender", es: "Transgénero", fr: "Transgenre", de: "Transgender", pt: "Transgênero", zh: "跨性别", ar: "متحول جنسياً", hi: "ट्रांसजेंडर", bn: "ট্রান্সজেন্ডার", ur: "ٹرانس جینڈر" },
   or_queer: { ru: "Квир / другое", en: "Queer / other", es: "Queer / otro", fr: "Queer / autre", de: "Queer / andere", pt: "Queer / outro", zh: "酷儿 / 其他", ar: "كوير / أخرى", hi: "क्वीयर / अन्य", bn: "কুইয়ার / অন্য", ur: "کوئیر / دیگر" },
+  or_asexual: { ru: "Асексуал", en: "Asexual", es: "Asexual", fr: "Asexuel", de: "Asexuell", pt: "Assexual", zh: "无性恋", ar: "لا جنسي", hi: "एसेक्शुअल", bn: "অ্যাসেক্সুয়াল", ur: "اے سیکشوئل" },
+  or_demisexual: { ru: "Демисексуал", en: "Demisexual", es: "Demisexual", fr: "Demisexuel", de: "Demisexuell", pt: "Demissexual", zh: "半性恋", ar: "ديمي جنسي", hi: "डेमिसेक्शुअल", bn: "ডেমিসেক্সুয়াল", ur: "ڈیمی سیکشوئل" },
+  or_sapiosexual: { ru: "Сапиосексуал", en: "Sapiosexual", es: "Sapiosexual", fr: "Sapiosexuel", de: "Sapiosexuell", pt: "Sapiossexual", zh: "智性恋", ar: "سابيو جنسي", hi: "सैपिओसेक्शुअल", bn: "স্যাপিওসেক্সুয়াল", ur: "سیپیو سیکشوئل" },
+  or_omnisexual: { ru: "Омнисексуал", en: "Omnisexual", es: "Omnisexual", fr: "Omnisexuel", de: "Omnisexuell", pt: "Omnissexual", zh: "全性恋", ar: "أومني جنسي", hi: "ऑम्निसेक्शुअल", bn: "অমনিসেক্সুয়াল", ur: "اومنی سیکشوئل" },
+  or_polysexual: { ru: "Полисексуал", en: "Polysexual", es: "Polisexual", fr: "Polysexuel", de: "Polysexuell", pt: "Polissexual", zh: "多性恋", ar: "بولي جنسي", hi: "पॉलीसेक्शुअल", bn: "পলিসেক্সুয়াল", ur: "پولی سیکشوئل" },
+  or_aromantic: { ru: "Аромантик", en: "Aromantic", es: "Arromántico", fr: "Aromantique", de: "Aromantisch", pt: "Aromântico", zh: "无浪漫倾向", ar: "لا رومانسي", hi: "एरोमैंटिक", bn: "অ্যারোম্যান্টিক", ur: "اے رومینٹک" },
+  or_fluid: { ru: "Флюидная", en: "Fluid", es: "Fluido", fr: "Fluide", de: "Fluid", pt: "Fluido", zh: "流性恋", ar: "متغير", hi: "फ्लूइड", bn: "ফ্লুইড", ur: "فلوئڈ" },
+  or_questioning: { ru: "В поиске себя", en: "Questioning", es: "En cuestionamiento", fr: "En questionnement", de: "Unsicher", pt: "Em questionamento", zh: "探索中", ar: "غير متأكد", hi: "अनिश्चित", bn: "অনিশ্চিত", ur: "غیر یقینی" },
+  birth_date: { ru: "Дата рождения", en: "Date of birth", es: "Fecha de nacimiento", fr: "Date de naissance", de: "Geburtsdatum", pt: "Data de nascimento", zh: "出生日期", ar: "تاريخ الميلاد", hi: "जन्म तिथि", bn: "জন্ম তারিখ", ur: "تاریخ پیدائش" },
+  day: { ru: "День", en: "Day", es: "Día", fr: "Jour", de: "Tag", pt: "Dia", zh: "日", ar: "يوم", hi: "दिन", bn: "দিন", ur: "دن" },
+  month: { ru: "Месяц", en: "Month", es: "Mes", fr: "Mois", de: "Monat", pt: "Mês", zh: "月", ar: "شهر", hi: "महीना", bn: "মাস", ur: "مہینہ" },
+  year: { ru: "Год", en: "Year", es: "Año", fr: "Année", de: "Jahr", pt: "Ano", zh: "年", ar: "سنة", hi: "साल", bn: "বছর", ur: "سال" },
+  language_label: { ru: "Язык", en: "Language", es: "Idioma", fr: "Langue", de: "Sprache", pt: "Idioma", zh: "语言", ar: "اللغة", hi: "भाषा", bn: "ভাষা", ur: "زبان" },
+  zodiac: { ru: "Знак зодиака", en: "Zodiac sign", es: "Signo zodiacal", fr: "Signe astrologique", de: "Sternzeichen", pt: "Signo", zh: "星座", ar: "برج", hi: "राशि", bn: "রাশি", ur: "ستارہ" },
+  zod_aries: { ru: "Овен", en: "Aries", es: "Aries", fr: "Bélier", de: "Widder", pt: "Áries", zh: "白羊座", ar: "الحمل", hi: "मेष", bn: "মেষ", ur: "حمل" },
+  zod_taurus: { ru: "Телец", en: "Taurus", es: "Tauro", fr: "Taureau", de: "Stier", pt: "Touro", zh: "金牛座", ar: "الثور", hi: "वृषभ", bn: "বৃষ", ur: "ثور" },
+  zod_gemini: { ru: "Близнецы", en: "Gemini", es: "Géminis", fr: "Gémeaux", de: "Zwillinge", pt: "Gêmeos", zh: "双子座", ar: "الجوزاء", hi: "मिथुन", bn: "মিথুন", ur: "جوزا" },
+  zod_cancer: { ru: "Рак", en: "Cancer", es: "Cáncer", fr: "Cancer", de: "Krebs", pt: "Câncer", zh: "巨蟹座", ar: "السرطان", hi: "कर्क", bn: "কর্কট", ur: "سرطان" },
+  zod_leo: { ru: "Лев", en: "Leo", es: "Leo", fr: "Lion", de: "Löwe", pt: "Leão", zh: "狮子座", ar: "الأسد", hi: "सिंह", bn: "সিংহ", ur: "اسد" },
+  zod_virgo: { ru: "Дева", en: "Virgo", es: "Virgo", fr: "Vierge", de: "Jungfrau", pt: "Virgem", zh: "处女座", ar: "العذراء", hi: "कन्या", bn: "কন্যা", ur: "سنبلہ" },
+  zod_libra: { ru: "Весы", en: "Libra", es: "Libra", fr: "Balance", de: "Waage", pt: "Libra", zh: "天秤座", ar: "الميزان", hi: "तुला", bn: "তুলা", ur: "میزان" },
+  zod_scorpio: { ru: "Скорпион", en: "Scorpio", es: "Escorpio", fr: "Scorpion", de: "Skorpion", pt: "Escorpião", zh: "天蝎座", ar: "العقرب", hi: "वृश्चिक", bn: "বৃশ্চিক", ur: "عقرب" },
+  zod_sagittarius: { ru: "Стрелец", en: "Sagittarius", es: "Sagitario", fr: "Sagittaire", de: "Schütze", pt: "Sagitário", zh: "射手座", ar: "القوس", hi: "धनु", bn: "ধনু", ur: "قوس" },
+  zod_capricorn: { ru: "Козерог", en: "Capricorn", es: "Capricornio", fr: "Capricorne", de: "Steinbock", pt: "Capricórnio", zh: "摩羯座", ar: "الجدي", hi: "मकर", bn: "মকর", ur: "جدی" },
+  zod_aquarius: { ru: "Водолей", en: "Aquarius", es: "Acuario", fr: "Verseau", de: "Wassermann", pt: "Aquário", zh: "水瓶座", ar: "الدلو", hi: "कुंभ", bn: "কুম্ভ", ur: "دلو" },
+  zod_pisces: { ru: "Рыбы", en: "Pisces", es: "Piscis", fr: "Poissons", de: "Fische", pt: "Peixes", zh: "双鱼座", ar: "الحوت", hi: "मीन", bn: "মীন", ur: "حوت" },
   cancel_warning: { ru: "Внимание: при отмене свидания возвращается только {p}% монет ({r} 🪙). Остальные {k} 🪙 получит ваш партнёр как компенсацию. Отменить?", en: "Warning: cancelling a date refunds only {p}% of the coins ({r} 🪙). The remaining {k} 🪙 go to your date as compensation. Cancel anyway?", es: "Atención: al cancelar solo se devuelve el {p}% de las monedas ({r} 🪙). Las {k} 🪙 restantes van a tu cita como compensación. ¿Cancelar?", fr: "Attention : l'annulation ne rembourse que {p} % des pièces ({r} 🪙). Les {k} 🪙 restantes vont à votre partenaire en compensation. Annuler ?", de: "Achtung: Bei Absage werden nur {p}% der Münzen ({r} 🪙) erstattet. Die restlichen {k} 🪙 gehen als Entschädigung an dein Date. Trotzdem absagen?", pt: "Atenção: ao cancelar, apenas {p}% das moedas ({r} 🪙) são devolvidas. As {k} 🪙 restantes vão para seu par como compensação. Cancelar?", zh: "注意：取消约会仅退还 {p}% 金币（{r} 🪙），其余 {k} 🪙 作为补偿给对方。确认取消？", ar: "تحذير: إلغاء الموعد يُعيد {p}% فقط من العملات ({r} 🪙). الباقي {k} 🪙 يذهب للطرف الآخر كتعويض. إلغاء؟", hi: "चेतावनी: डेट रद्द करने पर केवल {p}% कॉइन ({r} 🪙) वापस मिलेंगे। बाकी {k} 🪙 साथी को क्षतिपूर्ति में जाएंगे। रद्द करें?", bn: "সতর্কতা: ডেট বাতিলে কেবল {p}% কয়েন ({r} 🪙) ফেরত। বাকি {k} 🪙 সঙ্গীকে ক্ষতিপূরণ হিসেবে যাবে। বাতিল করবেন?", ur: "خبردار: ملاقات منسوخ کرنے پر صرف {p}% کوائنز ({r} 🪙) واپس ملیں گے۔ باقی {k} 🪙 ساتھی کو معاوضے میں جائیں گے۔ منسوخ کریں؟" },
   cancel_note: { ru: "При отмене возвращается {p}% монет", en: "Cancelling refunds {p}% of coins", es: "Cancelar devuelve el {p}% de las monedas", fr: "L'annulation rembourse {p} % des pièces", de: "Absage erstattet {p}% der Münzen", pt: "Cancelar devolve {p}% das moedas", zh: "取消退还 {p}% 金币", ar: "الإلغاء يُعيد {p}% من العملات", hi: "रद्द करने पर {p}% कॉइन वापस", bn: "বাতিলে {p}% কয়েন ফেরত", ur: "منسوخی پر {p}% کوائنز واپس" },
   date_cancelled_partial: { ru: "Свидание отменено. Возвращено {r} 🪙", en: "Date cancelled. {r} 🪙 refunded", es: "Cita cancelada. {r} 🪙 devueltas", fr: "Rendez-vous annulé. {r} 🪙 remboursées", de: "Date abgesagt. {r} 🪙 erstattet", pt: "Encontro cancelado. {r} 🪙 devolvidas", zh: "约会已取消，退还 {r} 🪙", ar: "تم إلغاء الموعد. استُرجع {r} 🪙", hi: "डेट रद्द। {r} 🪙 वापस", bn: "ডেট বাতিল। {r} 🪙 ফেরত", ur: "ملاقات منسوخ۔ {r} 🪙 واپس" },

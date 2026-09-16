@@ -3,7 +3,7 @@ import { Heart, Gift, Video, CalendarHeart, MapPin, BadgeCheck, Crown, ChevronLe
 import { Button } from "./ui/button";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
-import { t } from "../lib/i18n";
+import { t, ZODIAC_EMOJI } from "../lib/i18n";
 import { fileUrl } from "../lib/api";
 import { optLabel } from "./ProfileDetailsForm";
 import { presence } from "../lib/presence";
@@ -59,6 +59,11 @@ export default function ProfileCard({ p, onLike, onGift, onVideo, onDate, onMess
             <div>
               <h3 className="font-serif-luxe text-2xl leading-tight">{p.name}, {p.age}</h3>
               <p className="text-xs text-slate-300 flex items-center gap-1 mt-0.5"><MapPin size={11} /> {p.city}, {p.country}</p>
+              {p.zodiac && (
+                <span data-testid={`profile-card-zodiac-${p.id}`} className="mt-1 inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-violet-500/20 border border-violet-400/30 text-[10px] text-violet-200">
+                  <span aria-hidden="true">{ZODIAC_EMOJI[p.zodiac] || "✨"}</span> {t(`zod_${p.zodiac}`, lang)}
+                </span>
+              )}
             </div>
           </div>
           {p.bio && <p className="mt-2 text-xs text-slate-400 line-clamp-2">{p.bio}</p>}

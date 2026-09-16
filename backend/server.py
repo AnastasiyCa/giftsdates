@@ -347,6 +347,37 @@ async def have_met(a: str, b: str) -> bool:
     return bool(await db.date_bookings.find_one({"status": {"$in": ["confirmed", "released"]}, "$or": [{"from_id": a, "to_id": b}, {"from_id": b, "to_id": a}]}))
 
 # ---------- Models ----------
+ZODIAC_RANGES = [
+    ((1, 20), "aquarius"), ((2, 19), "pisces"), ((3, 21), "aries"), ((4, 20), "taurus"),
+    ((5, 21), "gemini"), ((6, 21), "cancer"), ((7, 23), "leo"), ((8, 23), "virgo"),
+    ((9, 23), "libra"), ((10, 23), "scorpio"), ((11, 22), "sagittarius"), ((12, 22), "capricorn"),
+]
+
+def zodiac_sign(month: int, day: int) -> Optional[str]:
+    try:
+        month = int(month); day = int(day)
+    except (TypeError, ValueError):
+        return None
+    if not (1 <= month <= 12 and 1 <= day <= 31):
+        return None
+    sign = "capricorn"  # Dec 22 - Jan 19 wraps to capricorn
+    for (m, d), name in ZODIAC_RANGES:
+        if month == m and day >= d:
+            sign = name
+        elif month == m and day < d:
+            break
+        elif month > m:
+            sign = name
+    return sign
+
+def age_from_birth(year: int, month: int, day: int) -> Optional[int]:
+    try:
+        today = datetime.now(timezone.utc).date()
+        a = today.year - int(year) - ((today.month, today.day) < (int(month), int(day)))
+        return a if 0 < a < 120 else None
+    except (TypeError, ValueError):
+        return None
+
 class RegisterReq(BaseModel):
     email: EmailStr
     password: str
@@ -360,6 +391,10 @@ class RegisterReq(BaseModel):
     bio: Optional[str] = ""
     referral_code: Optional[str] = None
     spin_token: Optional[str] = None
+    language: Optional[str] = "en"
+    birth_year: Optional[int] = None
+    birth_month: Optional[int] = None
+    birth_day: Optional[int] = None
 
 class LoginReq(BaseModel):
     email: EmailStr
@@ -368,6 +403,9 @@ class LoginReq(BaseModel):
 class ProfileUpdate(BaseModel):
     name: Optional[str] = None
     age: Optional[int] = None
+    birth_year: Optional[int] = None
+    birth_month: Optional[int] = None
+    birth_day: Optional[int] = None
     bio: Optional[str] = None
     city: Optional[str] = None
     country: Optional[str] = None
@@ -719,11 +757,21 @@ async def register(req: RegisterReq):
     referrer = None
     if req.referral_code:
         referrer = await db.users.find_one({"referral_code": req.referral_code.strip().upper()}, {"id": 1})
+    birth_date = None
+    zodiac = None
+    age = req.age
+    if req.birth_year and req.birth_month and req.birth_day:
+        birth_date = f"{int(req.birth_year):04d}-{int(req.birth_month):02d}-{int(req.birth_day):02d}"
+        zodiac = zodiac_sign(req.birth_month, req.birth_day)
+        computed = age_from_birth(req.birth_year, req.birth_month, req.birth_day)
+        if computed:
+            age = computed
     doc = {
         "id": uid, "email": req.email.lower(), "password": hash_pwd(req.password),
-        "name": req.name, "age": req.age, "gender": req.gender,
+        "name": req.name, "age": age, "gender": req.gender,
+        "birth_date": birth_date, "zodiac": zodiac,
         "interested_in": req.interested_in, "orientation": req.orientation or "straight", "city": req.city, "country": req.country,
-        "bio": req.bio or "", "interests": [], "photos": [], "language": "en",
+        "bio": req.bio or "", "interests": [], "photos": [], "language": req.language or "en",
         "coins": 0,  # no welcome bonus (Spin & Win only)
         "escrow": 0.0, "withdrawable": 0.0,
         "premium_until": None, "verified": False,
@@ -771,6 +819,12 @@ async def update_me(patch: ProfileUpdate, user=Depends(get_current_user)):
     if "availability_time" in upd and upd["availability_time"] and not _win_ok(upd["availability_time"]): raise HTTPException(400, "Invalid time window")
     if "availability_slots" in upd:
         upd["availability_slots"] = {k[:10]: v for k, v in (upd["availability_slots"] or {}).items() if re.fullmatch(r"\d{4}-\d{2}-\d{2}", k[:10]) and _win_ok(v)}
+    by, bm, bd = upd.pop("birth_year", None), upd.pop("birth_month", None), upd.pop("birth_day", None)
+    if by and bm and bd:
+        upd["birth_date"] = f"{int(by):04d}-{int(bm):02d}-{int(bd):02d}"
+        upd["zodiac"] = zodiac_sign(bm, bd)
+        computed = age_from_birth(by, bm, bd)
+        if computed: upd["age"] = computed
     if upd:
         await db.users.update_one({"id": user["id"]}, {"$set": upd})
     fresh = await db.users.find_one({"id": user["id"]}, {"_id": 0, "password": 0})
