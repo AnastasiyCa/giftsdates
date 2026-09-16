@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useApp } from "../context/AppContext";
 import { t } from "../lib/i18n";
 import SpinWheel from "../components/SpinWheel";
+import { Eye, EyeOff } from "lucide-react";
 
 export default function Auth() {
   const { login, register, lang } = useApp();
@@ -19,6 +20,7 @@ export default function Auth() {
   const [f, setF] = useState({ email: "", password: "", name: "", age: 25, gender: "female", interested_in: "male", orientation: "straight", city: "", country: "", bio: "", referral_code: sp.get("ref") || "" });
   const [busy, setBusy] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [pendingSpin] = useState(() => {
     try { const p = JSON.parse(localStorage.getItem("gd_spin_prize") || "null"); return p && localStorage.getItem("gd_spin_token") ? p : null; } catch { return null; }
   });
@@ -75,7 +77,12 @@ export default function Auth() {
           </div>
           <div>
             <Label className="text-xs text-slate-400">{t("password", lang)}</Label>
-            <Input data-testid="auth-password-input" type="password" required value={f.password} onChange={e => setF({ ...f, password: e.target.value })} className="bg-white/5 border-white/10 mt-1" />
+            <div className="relative mt-1">
+              <Input data-testid="auth-password-input" type={showPassword ? "text" : "password"} required value={f.password} onChange={e => setF({ ...f, password: e.target.value })} className="bg-white/5 border-white/10 pr-10" />
+              <button type="button" data-testid="auth-password-toggle" onClick={() => setShowPassword(s => !s)} aria-label={showPassword ? "Hide password" : "Show password"} className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-rose-300 transition-colors">
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
           </div>
 
           {mode === "register" && (
