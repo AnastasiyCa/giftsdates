@@ -6,9 +6,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "./ui/dialog";
 import { Button } from "./ui/button";
 import { api } from "../lib/api";
 import { useApp } from "../context/AppContext";
+import { t } from "../lib/i18n";
 
 export const GiftPremiumModal = ({ open, onOpenChange, target }) => {
-  const { user, refreshUser } = useApp();
+  const { user, refreshUser, lang } = useApp();
   const nav = useNavigate();
   const [busy, setBusy] = useState(false);
   const avail = (user?.coins || 0) + (user?.withdrawable || 0);
@@ -28,7 +29,7 @@ export const GiftPremiumModal = ({ open, onOpenChange, target }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#161018] border-white/10 text-white max-w-sm" data-testid="gift-premium-modal">
-        <DialogHeader><DialogTitle className="font-serif-luxe text-2xl gold-text flex items-center gap-2"><Gift size={20} className="text-rose-400" /> Подарить премиум · {target?.name}</DialogTitle></DialogHeader>
+        <DialogHeader><DialogTitle className="font-serif-luxe text-2xl gold-text flex items-center gap-2"><Gift size={20} className="text-rose-400" /> {t("gift_premium", lang)} · {target?.name}</DialogTitle></DialogHeader>
         <p className="text-sm text-slate-400">Подарите 30 дней подписки. Спишется с вашего баланса (🪙 {avail}).</p>
         <Button data-testid="gift-premium-30" onClick={() => gift("premium")} disabled={busy} className="rose-btn text-white border-0 h-12 justify-between px-4">
           <span className="flex items-center gap-2"><Crown size={16} /> Premium · 30 дней</span><span className="font-mono-num">🪙 300</span>

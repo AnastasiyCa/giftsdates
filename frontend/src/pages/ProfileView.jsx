@@ -89,7 +89,7 @@ export default function ProfileView() {
               <Flag size={13} /> Report this user
             </button>
             <button data-testid="profile-view-gift-premium-button" onClick={() => setModal("giftpremium")} className="ms-4 inline-flex items-center gap-1.5 text-xs text-amber-300 hover:text-amber-200 transition-colors">
-              <CrownGift size={13} /> Подарить премиум
+              <CrownGift size={13} /> {t("gift_premium", lang)}
             </button>
 
             <div className="flex flex-wrap gap-2">

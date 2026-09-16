@@ -38,6 +38,7 @@ const T = {
   login: { ru: "Войти", en: "Log in", es: "Entrar", fr: "Connexion", de: "Anmelden", pt: "Entrar", zh: "登录", ar: "دخول", hi: "लॉग इन", bn: "লগ ইন", ur: "لاگ ان" },
   register: { ru: "Регистрация", en: "Sign up", es: "Registrarse", fr: "S'inscrire", de: "Registrieren", pt: "Cadastrar", zh: "注册", ar: "التسجيل", hi: "साइन अप", bn: "সাইন আপ", ur: "سائن اپ" },
   logout: { ru: "Выйти", en: "Log out", es: "Salir", fr: "Déconnexion", de: "Abmelden", pt: "Sair", zh: "退出", ar: "خروج", hi: "लॉग आउट", bn: "লগ আউট", ur: "لاگ آؤٹ" },
+  gift_premium: { ru: "Подарить премиум", en: "Gift Premium", es: "Regalar Premium", fr: "Offrir Premium", de: "Premium schenken", pt: "Presentear Premium", zh: "赠送高级会员", ar: "إهداء بريميوم", hi: "प्रीमियम गिफ्ट करें", bn: "প্রিমিয়াম উপহার দিন", ur: "پریمیم تحفہ دیں" },
   email: { ru: "Эл. почта", en: "Email", es: "Correo", fr: "Email", de: "E-Mail", pt: "Email", zh: "邮箱", ar: "البريد", hi: "ईमेल", bn: "ইমেইল", ur: "ای میل" },
   password: { ru: "Пароль", en: "Password", es: "Contraseña", fr: "Mot de passe", de: "Passwort", pt: "Senha", zh: "密码", ar: "كلمة السر", hi: "पासवर्ड", bn: "পাসওয়ার্ড", ur: "پاس ورڈ" },
   name: { ru: "Имя", en: "Name", es: "Nombre", fr: "Nom", de: "Name", pt: "Nome", zh: "姓名", ar: "الاسم", hi: "नाम", bn: "নাম", ur: "نام" },
