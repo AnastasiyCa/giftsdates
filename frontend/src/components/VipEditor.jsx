@@ -8,6 +8,7 @@ import { t } from "../lib/i18n";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Textarea } from "./ui/textarea";
+import { Switch } from "./ui/switch";
 import { VIP_CATEGORIES, VIP_PLACES, PRICE_KEYS, svcLabel, catTitle, placeLabel, priceLabel } from "../lib/vipCatalog";
 
 export default function VipEditor() {
@@ -22,9 +23,12 @@ export default function VipEditor() {
   const [slots, setSlots] = useState(v.availability || []);
   const [ns, setNs] = useState({ date: "", from: "18:00", to: "23:00" });
   const [photos, setPhotos] = useState(v.photos || []);
+  const [published, setPublished] = useState(v.published !== false);
   const [busy, setBusy] = useState(false);
   const photoRef = React.useRef(null);
+  const goBuyVip = () => { toast.info(t("vip_upsell", lang)); nav("/wallet?vip=1"); };
   const addPhoto = async (e) => {
+    if (!isVip) { goBuyVip(); return; }
     const f = e.target.files?.[0]; if (!f) return;
     if (photos.length >= 12) { toast.error(t("vip_max_photos", lang)); return; }
     const fd = new FormData(); fd.append("photo", f);
@@ -41,29 +45,23 @@ export default function VipEditor() {
     try { await api.post("/vip/photos/reorder", { photos: reordered }); toast.success(t("vip_cover_updated", lang)); } catch { toast.error("Ошибка"); }
   };
 
-  if (!isVip) {
-    return (
-      <div className="glass rounded-2xl p-6 mb-6 border border-amber-500/30 text-center" data-testid="vip-upsell">
-        <Crown className="mx-auto text-amber-300" size={34} />
-        <h2 className="font-serif-luxe text-2xl mt-2 gold-text">VIP-раздел</h2>
-        <p className="text-sm text-slate-300 mt-2 max-w-md mx-auto">{t("vip_upsell", lang)}</p>
-        <Button data-testid="vip-upsell-cta" onClick={() => nav("/wallet?vip=1")} className="rose-btn text-white border-0 mt-4"><Sparkles size={16} className="me-1" /> {t("vip_become_btn", lang)}</Button>
-      </div>
-    );
-  }
-
   const toggle = (arr, set, val) => set(arr.includes(val) ? arr.filter((x) => x !== val) : [...arr, val]);
   const addSlot = () => {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(ns.date) || ns.from >= ns.to) { toast.error("Укажите дату и корректное время"); return; }
     setSlots([...slots, { ...ns }].sort((a, b) => (a.date + a.from).localeCompare(b.date + b.from)));
   };
+  const onTogglePublish = (val) => {
+    if (!isVip) { goBuyVip(); return; }
+    setPublished(val);
+  };
   const save = async () => {
+    if (!isVip) { goBuyVip(); return; }
     setBusy(true);
     try {
       await api.put("/vip/profile", {
         services, places, client_wants: wants,
         price_hour: Number(prices.hour) || 0, price_2h: Number(prices.h2) || 0, price_3h: Number(prices.h3) || 0, price_night: Number(prices.night) || 0,
-        availability: slots,
+        availability: slots, published,
       });
       await refreshUser();
       toast.success(t("vip_saved_toast", lang));
@@ -72,6 +70,22 @@ export default function VipEditor() {
 
   return (
     <div className="glass rounded-2xl p-6 mb-6 border border-rose-500/30 space-y-5" data-testid="vip-editor">
+      <div className={`rounded-2xl p-4 border ${isVip ? "border-amber-500/30 bg-amber-500/5" : "border-amber-500/40 bg-amber-500/10"}`} data-testid="vip-publish-box">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <Crown className="text-amber-300 shrink-0" size={22} />
+            <div>
+              <div className="text-sm font-semibold text-amber-100">{t("vip_publish_toggle", lang)}</div>
+              <div className="text-xs text-slate-400">{isVip ? (published ? t("vip_live", lang) : t("vip_hidden", lang)) : t("vip_preview_note", lang)}</div>
+            </div>
+          </div>
+          <Switch data-testid="vip-publish-switch" checked={isVip && published} onCheckedChange={onTogglePublish} />
+        </div>
+        {!isVip && (
+          <Button data-testid="vip-buy-publish-cta" onClick={goBuyVip} className="rose-btn text-white border-0 mt-3 w-full sm:w-auto"><Sparkles size={16} className="me-1" /> {t("vip_buy_publish", lang)}</Button>
+        )}
+      </div>
+
       <h2 className="font-serif-luxe text-2xl gold-text flex items-center gap-2"><Crown size={22} className="text-amber-300" /> {t("vip_editor_title", lang)}</h2>
       <p className="text-xs text-slate-400">{t("vip_editor_note", lang)}</p>
 

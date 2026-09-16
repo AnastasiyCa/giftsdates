@@ -1108,7 +1108,7 @@ async def list_profiles(
     if online_now: conds.append({"last_seen": {"$gt": (datetime.now(timezone.utc) - timedelta(minutes=5)).isoformat()}})
     now_iso = datetime.now(timezone.utc).isoformat()
     if premium_only: conds.append({"premium_until": {"$gt": now_iso}})
-    if vip_filter: conds.append({"vip_until": {"$gt": now_iso}})
+    if vip_filter: conds.append({"vip_until": {"$gt": now_iso}}); conds.append({"vip.published": {"$ne": False}})
     if vip_categories:
         cats = [c.strip() for c in vip_categories.split(",") if c.strip() in VIP_SERVICES]
         names = [s for c in cats for s in VIP_SERVICES[c]]
@@ -1814,6 +1814,7 @@ class VipProfileReq(BaseModel):
     places: List[str] = []
     client_wants: str = ""
     availability: List[dict] = []
+    published: bool = True
 
 @api.get("/vip/catalog")
 async def vip_catalog(user=Depends(get_current_user)):
@@ -1834,7 +1835,11 @@ async def put_vip_profile(req: VipProfileReq, user=Depends(get_current_user)):
     vip = {"services": services,
            "prices": {"hour": max(0, req.price_hour), "h2": max(0, req.price_2h), "h3": max(0, req.price_3h), "night": max(0, req.price_night)},
            "places": places, "client_wants": (req.client_wants or "").strip()[:1000],
-           "availability": slots, "updated_at": datetime.now(timezone.utc).isoformat()}
+           "availability": slots, "published": bool(req.published), "updated_at": datetime.now(timezone.utc).isoformat()}
+    # preserve previously uploaded photos (managed by separate photo endpoints)
+    existing = await db.users.find_one({"id": user["id"]}, {"_id": 0, "vip.photos": 1})
+    if existing and existing.get("vip", {}).get("photos"):
+        vip["photos"] = existing["vip"]["photos"]
     await db.users.update_one({"id": user["id"]}, {"$set": {"vip": vip}})
     return {"saved": True, "vip": vip}
 
@@ -1843,8 +1848,12 @@ async def get_vip_profile(uid: str, user=Depends(get_current_user)):
     owner = await db.users.find_one({"id": uid}, {"_id": 0, "id": 1, "name": 1, "city": 1, "vip": 1})
     if not owner or not owner.get("vip"):
         raise HTTPException(404, "No VIP profile")
-    if uid == user["id"] or is_premium(user):
-        return {"locked": False, "user_id": uid, "name": owner.get("name"), "city": owner.get("city"), "vip": owner["vip"], "is_owner": uid == user["id"]}
+    is_owner = uid == user["id"]
+    # Unpublished VIP profiles are only visible to their owner
+    if owner["vip"].get("published") is False and not is_owner:
+        raise HTTPException(404, "No VIP profile")
+    if is_owner or is_premium(user):
+        return {"locked": False, "user_id": uid, "name": owner.get("name"), "city": owner.get("city"), "vip": owner["vip"], "is_owner": is_owner}
     _p = owner["vip"].get("photos") or []
     return {"locked": True, "teaser_photo": _p[0] if _p else None, "services_count": len(owner["vip"].get("services") or [])}
 
